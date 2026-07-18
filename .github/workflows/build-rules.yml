@@ -28,12 +28,25 @@ jobs:
         with:
           python-version: "3.x"
       - run: python scripts/build-rules.py
-      - name: Commit generated JSON
+      - name: Validate generated JSON
+        run: |
+          python -m json.tool build/all-domains.json >/dev/null
+          python -m json.tool build/all-ips.json >/dev/null
+          python -m json.tool build/vpn-domains.json >/dev/null
+          python -m json.tool build/vpn-ips.json >/dev/null
+          python -m json.tool build/zapret-domains.json >/dev/null
+          python -m json.tool build/zapret-ips.json >/dev/null
+      - name: Publish packages branch
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Update generated rule JSON"
-          file_pattern: "all-domains.json all-ips.json vpn-domains.json vpn-ips.json zapret-domains.json zapret-ips.json"
-      - name: Check generated JSON
-        if: github.event_name == 'pull_request'
-        run: git diff --exit-code -- all-domains.json all-ips.json vpn-domains.json vpn-ips.json zapret-domains.json zapret-ips.json
+        run: |
+          tmp_dir="$(mktemp -d)"
+          cp -R build/. "$tmp_dir/"
+          git fetch origin packages || true
+          git switch --orphan packages
+          git rm -rf .
+          cp -R "$tmp_dir/." .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update generated packages"
+          git push -f origin packages

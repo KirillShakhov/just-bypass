@@ -6,6 +6,7 @@ from pathlib import Path
 
 
 PROFILES = ("vpn", "zapret")
+OUTPUT_DIR = Path("build")
 
 
 def read_lines(path: Path) -> list[str]:
@@ -75,6 +76,7 @@ def collect_ip_cidrs(root: Path, profile: str) -> list[str]:
 
 def write_rule_set(path: Path, key: str, values: list[str]) -> None:
     data = {"version": 1, "rules": [{key: values}]}
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
@@ -84,6 +86,7 @@ def main() -> None:
     args = parser.parse_args()
 
     root = args.root
+    output_dir = root / OUTPUT_DIR
     all_domains = []
     all_ip_cidrs = []
 
@@ -91,14 +94,14 @@ def main() -> None:
         domains = collect_domains(root, profile)
         ip_cidrs = collect_ip_cidrs(root, profile)
 
-        write_rule_set(root / f"{profile}-domains.json", "domain_suffix", domains)
-        write_rule_set(root / f"{profile}-ips.json", "ip_cidr", ip_cidrs)
+        write_rule_set(output_dir / f"{profile}-domains.json", "domain_suffix", domains)
+        write_rule_set(output_dir / f"{profile}-ips.json", "ip_cidr", ip_cidrs)
 
         all_domains.extend(domains)
         all_ip_cidrs.extend(ip_cidrs)
 
-    write_rule_set(root / "all-domains.json", "domain_suffix", unique(all_domains))
-    write_rule_set(root / "all-ips.json", "ip_cidr", unique(all_ip_cidrs))
+    write_rule_set(output_dir / "all-domains.json", "domain_suffix", unique(all_domains))
+    write_rule_set(output_dir / "all-ips.json", "ip_cidr", unique(all_ip_cidrs))
 
 
 if __name__ == "__main__":
