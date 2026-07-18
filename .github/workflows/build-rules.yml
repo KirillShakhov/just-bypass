@@ -43,7 +43,7 @@ jobs:
           cp -R build/. "$tmp_dir/"
           git fetch origin packages || true
           git switch --orphan packages
-          git rm -rf .
+          git rm -rf . || true
           cp -R "$tmp_dir/." .
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
