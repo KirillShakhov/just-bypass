@@ -1,0 +1,39 @@
+name: build-rules
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "domains/**/*.lst"
+      - "ip/**/*.lst"
+      - "scripts/build-rules.py"
+      - ".github/workflows/build-rules.yml"
+  pull_request:
+    paths:
+      - "domains/**/*.lst"
+      - "ip/**/*.lst"
+      - "scripts/build-rules.py"
+      - ".github/workflows/build-rules.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python scripts/build-rules.py
+      - name: Commit generated JSON
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update generated rule JSON"
+          file_pattern: "my-domains.json my-ips.json"
+      - name: Check generated JSON
+        if: github.event_name == 'pull_request'
+        run: git diff --exit-code -- my-domains.json my-ips.json
