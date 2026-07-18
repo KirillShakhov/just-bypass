@@ -5,6 +5,9 @@ import json
 from pathlib import Path
 
 
+PROFILES = ("vpn", "zapret")
+
+
 def read_lines(path: Path) -> list[str]:
     values = []
     for line_no, raw_line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
@@ -15,8 +18,8 @@ def read_lines(path: Path) -> list[str]:
     return values
 
 
-def list_sources(root: Path, directory: str) -> list[Path]:
-    source_dir = root / directory
+def list_sources(root: Path, profile: str, directory: str) -> list[Path]:
+    source_dir = root / profile / directory
     if not source_dir.exists():
         raise FileNotFoundError(f"missing source directory: {source_dir}")
     return sorted(source_dir.glob("**/*.lst"))
@@ -43,9 +46,9 @@ def normalize_domains(path: Path) -> list[str]:
     return domains
 
 
-def collect_domains(root: Path) -> list[str]:
+def collect_domains(root: Path, profile: str) -> list[str]:
     domains = []
-    for path in list_sources(root, "domains"):
+    for path in list_sources(root, profile, "domains"):
         domains.extend(normalize_domains(path))
     return unique(domains)
 
@@ -63,9 +66,9 @@ def normalize_ip_cidrs(path: Path) -> list[str]:
     return cidrs
 
 
-def collect_ip_cidrs(root: Path) -> list[str]:
+def collect_ip_cidrs(root: Path, profile: str) -> list[str]:
     cidrs = []
-    for path in list_sources(root, "ip"):
+    for path in list_sources(root, profile, "ip"):
         cidrs.extend(normalize_ip_cidrs(path))
     return unique(cidrs)
 
@@ -81,8 +84,21 @@ def main() -> None:
     args = parser.parse_args()
 
     root = args.root
-    write_rule_set(root / "my-domains.json", "domain_suffix", collect_domains(root))
-    write_rule_set(root / "my-ips.json", "ip_cidr", collect_ip_cidrs(root))
+    all_domains = []
+    all_ip_cidrs = []
+
+    for profile in PROFILES:
+        domains = collect_domains(root, profile)
+        ip_cidrs = collect_ip_cidrs(root, profile)
+
+        write_rule_set(root / f"{profile}-domains.json", "domain_suffix", domains)
+        write_rule_set(root / f"{profile}-ips.json", "ip_cidr", ip_cidrs)
+
+        all_domains.extend(domains)
+        all_ip_cidrs.extend(ip_cidrs)
+
+    write_rule_set(root / "all-domains.json", "domain_suffix", unique(all_domains))
+    write_rule_set(root / "all-ips.json", "ip_cidr", unique(all_ip_cidrs))
 
 
 if __name__ == "__main__":

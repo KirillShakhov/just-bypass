@@ -4,14 +4,14 @@ on:
   push:
     branches: [main]
     paths:
-      - "domains/**/*.lst"
-      - "ip/**/*.lst"
+      - "vpn/**/*.lst"
+      - "zapret/**/*.lst"
       - "scripts/build-rules.py"
       - ".github/workflows/build-rules.yml"
   pull_request:
     paths:
-      - "domains/**/*.lst"
-      - "ip/**/*.lst"
+      - "vpn/**/*.lst"
+      - "zapret/**/*.lst"
       - "scripts/build-rules.py"
       - ".github/workflows/build-rules.yml"
   workflow_dispatch:
@@ -33,7 +33,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update generated rule JSON"
-          file_pattern: "my-domains.json my-ips.json"
+          file_pattern: "all-domains.json all-ips.json vpn-domains.json vpn-ips.json zapret-domains.json zapret-ips.json"
       - name: Check generated JSON
         if: github.event_name == 'pull_request'
-        run: git diff --exit-code -- my-domains.json my-ips.json
+        run: git diff --exit-code -- all-domains.json all-ips.json vpn-domains.json vpn-ips.json zapret-domains.json zapret-ips.json
