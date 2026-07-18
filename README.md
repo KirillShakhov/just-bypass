@@ -1,4 +1,8 @@
-# sing-box custom rules
+# just-bypass
+
+Репозиторий: <https://github.com/KirillShakhov/just-bypass>
+
+Кастомные списки доменов и IP для sing-box/VPN и zapret.
 
 Исходники списков лежат в профильных каталогах:
 
@@ -19,7 +23,16 @@
 python3 scripts/build-rules.py
 ```
 
-После публикации на GitHub можно подключить нужный JSON как remote rule-set:
+Готовые raw-ссылки:
+
+- `all-domains.json`: <https://raw.githubusercontent.com/KirillShakhov/just-bypass/main/all-domains.json>
+- `all-ips.json`: <https://raw.githubusercontent.com/KirillShakhov/just-bypass/main/all-ips.json>
+- `vpn-domains.json`: <https://raw.githubusercontent.com/KirillShakhov/just-bypass/main/vpn-domains.json>
+- `vpn-ips.json`: <https://raw.githubusercontent.com/KirillShakhov/just-bypass/main/vpn-ips.json>
+- `zapret-domains.json`: <https://raw.githubusercontent.com/KirillShakhov/just-bypass/main/zapret-domains.json>
+- `zapret-ips.json`: <https://raw.githubusercontent.com/KirillShakhov/just-bypass/main/zapret-ips.json>
+
+Пример подключения VPN-списков в sing-box как remote rule-set:
 
 ```jsonc
 { "type": "remote", "tag": "vpn-domains", "format": "source", "url": "https://raw.githubusercontent.com/KirillShakhov/just-bypass/main/vpn-domains.json", "download_detour": "proxy", "update_interval": "1d" },
