@@ -7,3 +7,5 @@ public.ecr.aws
 cloudfront.net
 api.themoviedb.org
 image.tmdb.org
+repo.jellyfin.org
+jellyfin.org
